@@ -1,0 +1,60 @@
+{
+  "name": "Enquiry internal notification",
+  "flow": [
+    {
+      "id": 1,
+      "module": "gateway:CustomWebHook",
+      "version": 1,
+      "parameters": {
+        "hook": null,
+        "maxResults": 1
+      },
+      "mapper": {},
+      "metadata": {
+        "designer": { "x": 0, "y": 0 },
+        "restore": {
+          "parameters": {
+            "hook": { "label": "New enquiry" }
+          }
+        },
+        "parameters": [
+          {
+            "name": "hook",
+            "type": "hook:gateway-webhook",
+            "label": "Webhook",
+            "required": true
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "module": "email:ActionSendEmail",
+      "version": 7,
+      "parameters": {},
+      "mapper": {
+        "to": "owner@example.com",
+        "subject": "{{1.subject}}",
+        "content": "Service: {{1.service}}\nName: {{1.name}}\nEmail: {{1.email}}\nArrived (UTC): {{1.created_at}}\n\n{{1.message}}\n\nDashboard: {{1.dashboard_url}}"
+      },
+      "metadata": {
+        "designer": { "x": 300, "y": 0 }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": true,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": false,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": { "orphans": [] }
+  }
+}

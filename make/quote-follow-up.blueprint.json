@@ -1,0 +1,113 @@
+{
+  "name": "Quote follow-up check",
+  "flow": [
+    {
+      "id": 1,
+      "module": "schedule:TriggerScheduler",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "interval": 1440
+      },
+      "metadata": {
+        "designer": { "x": 0, "y": 0 }
+      }
+    },
+    {
+      "id": 2,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {},
+      "mapper": {
+        "url": "https://your-app.example/api/follow-ups",
+        "method": "get",
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Bearer your-make-api-secret"
+          }
+        ]
+      },
+      "metadata": {
+        "designer": { "x": 300, "y": 0 }
+      }
+    },
+    {
+      "id": 3,
+      "module": "builtin:BasicFeeder",
+      "version": 1,
+      "parameters": {},
+      "mapper": {
+        "array": "{{2.data.follow_ups}}"
+      },
+      "metadata": {
+        "designer": { "x": 600, "y": 0 }
+      }
+    },
+    {
+      "id": 4,
+      "module": "http:ActionSendData",
+      "version": 3,
+      "parameters": {},
+      "mapper": {
+        "url": "https://your-app.example/api/follow-ups/claim",
+        "method": "post",
+        "headers": [
+          {
+            "name": "Authorization",
+            "value": "Bearer your-make-api-secret"
+          },
+          {
+            "name": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": "{\"ids\":[\"{{3.id}}\"]}"
+      },
+      "metadata": {
+        "designer": { "x": 900, "y": 0 }
+      }
+    },
+    {
+      "id": 5,
+      "module": "email:ActionSendEmail",
+      "version": 7,
+      "parameters": {},
+      "filter": {
+        "name": "Claimed only",
+        "conditions": [
+          [
+            {
+              "a": "{{4.data.claimed}}",
+              "b": "{{3.id}}",
+              "o": "text:contain"
+            }
+          ]
+        ]
+      },
+      "mapper": {
+        "to": "owner@example.com",
+        "subject": "Follow up with {{3.name}}",
+        "content": "{{3.name}} ({{3.email}}) was quoted for {{3.service}} and the follow-up is due.\nQuoted at (UTC): {{3.quoted_at}}\nDue (UTC): {{3.follow_up_due_at}}\n\n{{3.message}}"
+      },
+      "metadata": {
+        "designer": { "x": 1200, "y": 0 }
+      }
+    }
+  ],
+  "metadata": {
+    "instant": false,
+    "version": 1,
+    "scenario": {
+      "roundtrips": 1,
+      "maxErrors": 3,
+      "autoCommit": true,
+      "autoCommitTriggerLast": true,
+      "sequential": true,
+      "confidential": false,
+      "dataloss": false,
+      "dlq": false
+    },
+    "designer": { "orphans": [] }
+  }
+}
