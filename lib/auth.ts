@@ -1,5 +1,4 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { io } from "next/cache";
 import { canReviewEnquiries } from "@/lib/enquiries/authz";
 import { createClient } from "@/lib/supabase/server";
 
@@ -9,9 +8,6 @@ export type OwnerContext =
   | { signedIn: true; isOwner: true; userId: string; supabase: SupabaseClient };
 
 export async function getOwnerContext(): Promise<OwnerContext> {
-  // getClaims compares token expiry with Date.now(). Cache Components treats
-  // that clock read as prerender IO unless it happens after a dynamic boundary.
-  await io();
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getClaims();
   const userId = !error && data?.claims?.sub ? data.claims.sub : null;

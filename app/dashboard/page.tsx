@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { io } from "next/cache";
 import { Suspense, type ReactNode } from "react";
 import { signOut } from "@/app/actions/auth";
 import { EnquiryControls } from "@/app/dashboard/enquiry-controls";
@@ -48,6 +49,10 @@ async function EnquiryList({
       </p>
     );
   }
+
+  // getClaims reads Date.now() for token expiry. This stays outside the
+  // try/catch so the prerender abort is handled by React, not logged as a failure.
+  await io();
 
   let context: Awaited<ReturnType<typeof getOwnerContext>>;
   try {
